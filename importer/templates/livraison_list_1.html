@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liste des Livraisons</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .filter-section {
+            padding: 30px 40px;
+            background: rgba(255, 255, 255, 0.8);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .filter-form {
+            display: flex;
+            gap: 20px;
+            align-items: end;
+            flex-wrap: wrap;
+        }
+
+        .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 0.9rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            align-items: end;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #6c757d;
+            border: 2px solid #dee2e6;
+        }
+
+        .btn-secondary:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+        }
+
+        .btn-success:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .selection-controls {
+            padding: 20px 40px;
+            background: rgba(248, 249, 250, 0.8);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .selection-info {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+
+        .selection-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .table-container {
+            padding: 0;
+            overflow-x: auto;
+        }
+
+        .table-wrapper {
+            background: white;
+            border-radius: 0 0 20px 20px;
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        th {
+            padding: 18px 16px;
+            text-align: left;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.8rem;
+        }
+
+        th:first-child {
+            width: 50px;
+            text-align: center;
+        }
+
+        tbody tr {
+            transition: all 0.3s ease;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        tbody tr:hover {
+            background: rgba(102, 126, 234, 0.05);
+            transform: scale(1.002);
+        }
+
+        tbody tr:nth-child(even) {
+            background: rgba(248, 249, 250, 0.5);
+        }
+
+        tbody tr:nth-child(even):hover {
+            background: rgba(102, 126, 234, 0.08);
+        }
+
+        tbody tr.selected {
+            background: rgba(40, 167, 69, 0.1) !important;
+            border-left: 4px solid #28a745;
+        }
+
+        td {
+            padding: 16px;
+            vertical-align: middle;
+            color: #495057;
+        }
+
+        td:first-child {
+            text-align: center;
+            width: 50px;
+        }
+
+        .checkbox-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .custom-checkbox {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #dee2e6;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+        }
+
+        .custom-checkbox:hover {
+            border-color: #667eea;
+            transform: scale(1.1);
+        }
+
+        .custom-checkbox.checked {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            border-color: #28a745;
+            color: white;
+        }
+
+        .custom-checkbox.checked::after {
+            content: '✓';
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+            font-size: 1.1rem;
+        }
+
+        .no-data::before {
+            content: "📦";
+            font-size: 3rem;
+            display: block;
+            margin-bottom: 20px;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .client-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .date-cell {
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .tarif-cell {
+            font-weight: 600;
+            color: #28a745;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .filter-section {
+                padding: 20px;
+            }
+
+            .filter-form {
+                flex-direction: column;
+            }
+
+            .form-group {
+                min-width: 100%;
+            }
+
+            .button-group {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .btn {
+                flex: 1;
+            }
+
+            .selection-controls {
+                padding: 15px 20px;
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            th, td {
+                padding: 12px 8px;
+                font-size: 0.8rem;
+            }
+        }
+
+        .stats-bar {
+            padding: 20px 40px;
+            background: rgba(248, 249, 250, 0.8);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            text-align: center;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .select-all-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        .selection-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            color: white;
+            box-shadow: 0 2px 8px rgba(39, 174, 96, 0.3);
+        }
+        
+        .btn-success:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(39, 174, 96, 0.4);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
+        }
+        
+        /* Responsive design for smaller screens */
+        @media (max-width: 768px) {
+            .selection-actions {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container animate-fade-in">
+        <div class="header">
+            <h1>📦 Liste des Livraisons prrrrrrrrrr</h1>
+            <p>Gestion moderne des livraisons</p>
+        </div>
+        {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+        {% endif %}
+    </div>
+        <div class="filter-section">
+            <form method="post" style="display: inline;">
+                {% csrf_token %}
+                <input type="hidden" name="import_action" value="1">
+                <button type="submit" class="btn btn-success">📥 Importer</button>
+            </form>
+            <form method="get" class="filter-form">
+                <div class="form-group">
+                    <label for="client">🏢 Client</label>
+                    <input type="text" 
+                           id="client" 
+                           name="client" 
+                           value="{{ client_filter }}" 
+                           placeholder="Rechercher par nom de client">
+                </div>
+
+                <div class="form-group">
+                    <label for="chargements">📋 Chargements</label>
+                    <input type="text" 
+                           id="chargements" 
+                           name="chargements" 
+                           value="{{ chargements_filter }}" 
+                           placeholder="Type de chargement">
+                </div>
+
+                <div class="button-group">
+                    <button type="submit" class="btn btn-primary">🔍 Filtrer</button>
+                    <a href="{% url 'liv' %}" class="btn btn-secondary">🔄 Réinitialiser</a>
+                </div>
+            </form>
+            
+        </div>
+
+        <div class="selection-controls">
+            <div class="select-all-wrapper">
+                <div class="custom-checkbox" id="selectAllCheckbox" onclick="toggleSelectAll()"></div>
+                <span>Tout sélectionner</span>
+            </div>
+            
+            <div class="selection-info">
+                <span id="selectionCount">0</span> livraison(s) sélectionnée(s)
+            </div>
+            
+            <div class="selection-actions">
+                <button type="button" class="btn btn-success" id="generateInvoiceBtn" onclick="generateInvoice()" disabled>
+                    📄 Générer Facture HTML
+                </button>
+                <button type="button" class="btn btn-primary" id="generateWordInvoiceBtn" onclick="generateWordInvoice()" disabled>
+                    📝 Générer Facture Word
+                </button>
+            </div>
+        </div>
+
+        <div class="stats-bar">
+            <span>Total: {{ livraisons|length }} livraison{{ livraisons|length|pluralize }}</span>
+        </div>
+
+        <div class="table-container">
+            <div class="table-wrapper">
+                <form id="invoiceForm" method="post" action="{% url 'generate_invoice' %}">
+                    {% csrf_token %}
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>☑️</th>
+                                <th>🏢 Client</th>
+                                <th>📅 Date Charge</th>
+                                <th>📍 Lieu Charge</th>
+                                <th>📍 Lieu Décharge</th>
+                                <th>📄 Bon Livraison</th>
+                                <th>🆔 ICE</th>
+                                <th>💰 Tarif</th>
+                                <th>📊 Qté</th>
+                                <th>📋 Facturation</th>
+                                <th>✏️ Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for livraison in livraisons %}
+                                <tr id="row-{{ livraison.pk }}">
+                                    <td>
+                                        <div class="checkbox-wrapper">
+                                            <div class="custom-checkbox row-checkbox" 
+                                                 data-id="{{ livraison.pk }}">
+                                            </div>
+                                            <input type="checkbox" 
+                                                   name="selected_livraisons" 
+                                                   value="{{ livraison.pk }}" 
+                                                   id="checkbox-{{ livraison.pk }}" 
+                                                   style="display: none;">
+                                        </div>
+                                    </td>
+                                    <td class="client-name">{{ livraison.client|default:"-" }}</td>
+                                    <td class="date-cell">{{ livraison.date_chargement|date:"d/m/Y"|default:"-" }}</td>
+                                    <td>{{ livraison.chargements|default:"-" }}</td>
+                                    <td>{{ livraison.dechargement|default:"-" }}</td>
+                                    <td>{{ livraison.bon_livraison|default:"-" }}</td>
+                                    <td>{{ livraison.ice|default:"-" }}</td>
+                                    <td class="tarif-cell">{{ livraison.tarif|default:"-" }}</td>
+                                    <td>{{ livraison.qte|default:"-" }}</td>
+                                    <td>
+                                        {% if livraison.facturation %}
+                                            <span class="status-badge">{{ livraison.facturation }}</span>
+                                        {% else %}
+                                            <span>-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'edit_livraison' livraison.pk %}">✏️ Edit</a>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="11" class="no-data">
+                                        Aucune livraison trouvée pour les critères sélectionnés.
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedRows = new Set();
+
+        function toggleRowSelection(id) {
+            const checkbox = document.getElementById(`checkbox-${id}`);
+            const customCheckbox = document.querySelector(`[data-id="${id}"]`);
+            const row = document.getElementById(`row-${id}`);
+            
+            if (selectedRows.has(id)) {
+                selectedRows.delete(id);
+                if (checkbox) checkbox.checked = false;
+                if (customCheckbox) customCheckbox.classList.remove('checked');
+                if (row) row.classList.remove('selected');
+            } else {
+                selectedRows.add(id);
+                if (checkbox) checkbox.checked = true;
+                if (customCheckbox) customCheckbox.classList.add('checked');
+                if (row) row.classList.add('selected');
+            }
+            
+            updateSelectionUI();
+        }
+        
+        function toggleSelectAll() {
+            const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+            const allCheckboxes = document.querySelectorAll('.row-checkbox');
+            const allHiddenCheckboxes = document.querySelectorAll('input[name="selected_livraisons"]');
+            const allRows = document.querySelectorAll('tbody tr[id^="row-"]');
+            
+            if (selectedRows.size === allCheckboxes.length && selectedRows.size > 0) {
+                // Unselect all
+                selectedRows.clear();
+                if (selectAllCheckbox) selectAllCheckbox.classList.remove('checked');
+                allCheckboxes.forEach(cb => cb.classList.remove('checked'));
+                allHiddenCheckboxes.forEach(cb => cb.checked = false);
+                allRows.forEach(row => row.classList.remove('selected'));
+            } else {
+                // Select all
+                selectedRows.clear();
+                if (selectAllCheckbox) selectAllCheckbox.classList.add('checked');
+                allCheckboxes.forEach(cb => {
+                    const id = parseInt(cb.getAttribute('data-id'));
+                    if (id) {
+                        selectedRows.add(id);
+                        cb.classList.add('checked');
+                    }
+                });
+                allHiddenCheckboxes.forEach(cb => cb.checked = true);
+                allRows.forEach(row => row.classList.add('selected'));
+            }
+            
+            updateSelectionUI();
+        }
+        
+        function updateSelectionUI() {
+            const selectionCount = document.getElementById('selectionCount');
+            const generateInvoiceBtn = document.getElementById('generateInvoiceBtn');
+            const generateWordInvoiceBtn = document.getElementById('generateWordInvoiceBtn');
+            const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+            const totalRows = document.querySelectorAll('.row-checkbox').length;
+            
+            // Update selection count
+            if (selectionCount) {
+                selectionCount.textContent = selectedRows.size;
+            }
+            
+            // Enable/disable buttons based on selection
+            const hasSelection = selectedRows.size > 0;
+            if (generateInvoiceBtn) {
+                generateInvoiceBtn.disabled = !hasSelection;
+            }
+            if (generateWordInvoiceBtn) {
+                generateWordInvoiceBtn.disabled = !hasSelection;
+            }
+            
+            // Update select all checkbox state
+            if (selectAllCheckbox) {
+                if (selectedRows.size === 0) {
+                    selectAllCheckbox.classList.remove('checked');
+                } else if (selectedRows.size === totalRows) {
+                    selectAllCheckbox.classList.add('checked');
+                } else {
+                    selectAllCheckbox.classList.remove('checked');
+                    // You could add an indeterminate style here if desired
+                }
+            }
+        }
+        
+        function generateInvoice() {
+            if (selectedRows.size === 0) {
+                alert('Veuillez sélectionner au moins une livraison.');
+                return;
+            }
+            
+            // Submit the form
+            const form = document.getElementById('invoiceForm');
+            if (form) {
+                form.submit();
+            }
+        }
+        
+        function generateWordInvoice() {
+            if (selectedRows.size === 0) {
+                alert('Veuillez sélectionner au moins une livraison.');
+                return;
+            }
+            
+            // Create form data
+            const formData = new FormData();
+            
+            // Add CSRF token
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+            if (csrfToken) {
+                formData.append('csrfmiddlewaretoken', csrfToken.value);
+            }
+            
+            // Add selected livraison IDs
+            selectedRows.forEach(id => {
+                formData.append('selected_livraisons', id);
+            });
+            
+            // Create and submit form
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/generate-word-invoice/'; // Update this with your actual URL
+            form.style.display = 'none';
+            
+            // Convert FormData to form inputs
+            for (let [key, value] of formData.entries()) {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = key;
+                input.value = value;
+                form.appendChild(input);
+            }
+            
+            document.body.appendChild(form);
+            form.submit();
+            document.body.removeChild(form);
+        }
+        
+        // Initialize everything when DOM is ready
+        function initializeCheckboxes() {
+            // Add click listeners to all row checkboxes
+            document.querySelectorAll('.row-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('click', function(e) {
+                    e.preventDefault(); // Prevent any default behavior
+                    const id = parseInt(this.getAttribute('data-id'));
+                    if (id) {
+                        toggleRowSelection(id);
+                    }
+                });
+            });
+            
+            // Initialize UI
+            updateSelectionUI();
+        }
+        
+        // Run initialization when DOM is loaded
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeCheckboxes);
+        } else {
+            initializeCheckboxes();
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            const importBtn = document.getElementById('import-btn');
+            
+            importBtn.addEventListener('click', function() {
+                // Disable button and show loading state
+                importBtn.disabled = true;
+                importBtn.innerHTML = '⏳ Importing...';
+                
+                // Make AJAX request
+                fetch('{% url "import_livraisons" %}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                        'Content-Type': 'application/json',
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Show success message
+                        showMessage(data.message, 'success');
+                        // Refresh the page to show new data
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1500);
+                    } else {
+                        showMessage(data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    showMessage('❌ An error occurred during import', 'error');
+                    console.error('Error:', error);
+                })
+                .finally(() => {
+                    // Re-enable button
+                    importBtn.disabled = false;
+                    importBtn.innerHTML = '📥 Importer';
+                });
+            });
+            
+            function showMessage(message, type) {
+                // Create message element
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `alert alert-${type}`;
+                messageDiv.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    z-index: 1000;
+                    padding: 15px;
+                    border-radius: 5px;
+                    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                    ${type === 'success' ? 'background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb;' : 
+                                           'background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;'}
+                `;
+                messageDiv.textContent = message;
+                
+                // Add to page
+                document.body.appendChild(messageDiv);
+                
+                // Remove after 3 seconds
+                setTimeout(() => {
+                    if (messageDiv.parentNode) {
+                        messageDiv.parentNode.removeChild(messageDiv);
+                    }
+                }, 3000);
+            }
+        });
+    </script>
+</body>
+</html>

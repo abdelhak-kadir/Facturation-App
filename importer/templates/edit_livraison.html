@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modifier Livraison</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 40px;
+            text-align: center;
+        }
+
+        .header h2 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .form-container {
+            padding: 40px;
+            background: white;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 14px 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+            font-family: inherit;
+            width: 100%;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-section {
+            background: rgba(248, 249, 250, 0.5);
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border-left: 4px solid #667eea;
+        }
+
+        .form-section h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+
+        .button-container {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            align-items: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 150px;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #6c757d;
+            border: 2px solid #dee2e6;
+        }
+
+        .btn-secondary:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .errorlist {
+            background: #fee;
+            border: 1px solid #fcc;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+            color: #c33;
+            list-style: none;
+        }
+
+        .errorlist li {
+            margin-bottom: 5px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+
+            .header {
+                padding: 25px 20px;
+            }
+
+            .header h2 {
+                font-size: 1.8rem;
+            }
+
+            .form-container {
+                padding: 25px 20px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .button-container {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+
+        /* Remove Django's default form-control styling conflicts */
+        .form-control {
+            padding: 14px 16px !important;
+            border: 2px solid #e1e5e9 !important;
+            border-radius: 12px !important;
+            font-size: 1rem !important;
+            background: white !important;
+            width: 100% !important;
+        }
+
+        .form-control:focus {
+            border-color: #667eea !important;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
+            outline: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>✏️ Modifier Livraison</h2>
+            <p>Mettre à jour les informations de livraison</p>
+        </div>
+
+        <div class="form-container">
+            <form method="post">
+                {% csrf_token %}
+
+                <!-- Display form errors if any -->
+                {% if form.non_field_errors %}
+                    <div class="errorlist">
+                        {% for error in form.non_field_errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <!-- Timestamp (hidden or readonly) -->
+                {% if form.timestamp %}
+                <div class="form-section">
+                    <h3>📅 Timestamp</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="{{ form.timestamp.id_for_label }}">Timestamp</label>
+                            {{ form.timestamp.errors }}
+                            {{ form.timestamp }}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Client & Driver Section -->
+                <div class="form-section">
+                    <h3>👥 Informations Client & Chauffeur</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="{{ form.client.id_for_label }}">🏢 Client</label>
+                            {{ form.client.errors }}
+                            {{ form.client }}
+                        </div>
+                        <div class="form-group">
+                            <label for="{{ form.nom_chauffeur.id_for_label }}">👤 Nom Chauffeur</label>
+                            {{ form.nom_chauffeur.errors }}
+                            {{ form.nom_chauffeur }}
+                        </div>
+                        <div class="form-group">
+                            <label for="{{ form.ice.id_for_label }}">🆔 ICE</label>
+                            {{ form.ice.errors }}
+                            {{ form.ice }}
+                        </div>
+                        <div class="form-group">
+                            <label for="{{ form.nom_destinataire.id_for_label }}">👤 Destinataire</label>
+                            {{ form.nom_destinataire.errors }}
+                            {{ form.nom_destinataire }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Transport Information -->
+                <div class="form-section">
+                    <h3>🚛 Informations Transport</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="{{ form.chargements.id_for_label }}">📦 Chargements</label>
+                            {{ form.chargements.errors }}
+                            {{ form.chargements }}
+                        </div>
+                        <div class="form-group">
+                            <label for="{{ form.date_chargement.id_for_label }}">📅 Date Chargement</label>
+                            {{ form.date_chargement.errors }}
+                            {{ form.date_chargement }}
+                        </div>
+                        <div class="form-group">
+                            <label for="{{ form.dechargement.id_for_label }}">📍 Lieu Déchargement</label>
+                            {{ form.dechargement.errors }}
+                            {{ form.dechargement }}
+                        </div>
+                        <div class="form-group">
+                            <label for="{{ form.qte.id_for_label }}">📊 Quantité</label>
+                            {{ form.qte.errors }}
+                            {{ form.qte }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Financial Information -->
+                <div class="form-section">
+                    <h3>💰 Informations Financières</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="{{ form.tarif.id_for_label }}">💰 Tarif</label>
+                            {{ form.tarif.errors }}
+                            {{ form.tarif }}
+                        </div>
+                        <div class="form-group">
+                            <label for="{{ form.deplacement.id_for_label }}">💰 Déplacement</label>
+                            {{ form.deplacement.errors }}
+                            {{ form.deplacement }}
+                        </div>
+                        <div class="form-group">
+                            <label for="{{ form.avance.id_for_label }}">💰 Avance</label>
+                            {{ form.avance.errors }}
+                            {{ form.avance }}
+                        </div>
+                        <div class="form-group">
+                            <label for="{{ form.charge_variable.id_for_label }}">💰 Charge Variable</label>
+                            {{ form.charge_variable.errors }}
+                            {{ form.charge_variable }}
+                        </div>
+                        <div class="form-group">
+                            <label for="{{ form.prix_cv.id_for_label }}">💰 Prix C.V</label>
+                            {{ form.prix_cv.errors }}
+                            {{ form.prix_cv }}
+                        </div>
+                        <div class="form-group">
+                            <label for="{{ form.facturation.id_for_label }}">📋 Facturation</label>
+                            {{ form.facturation.errors }}
+                            {{ form.facturation }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Document & Staff Information -->
+                <div class="form-section">
+                    <h3>📄 Documents & Personnel</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="{{ form.bon_livraison.id_for_label }}">📄 Bon Livraison</label>
+                            {{ form.bon_livraison.errors }}
+                            {{ form.bon_livraison }}
+                        </div>
+                        <div class="form-group">
+                            <label for="{{ form.operateur.id_for_label }}">👨‍💼 Opérateur</label>
+                            {{ form.operateur.errors }}
+                            {{ form.operateur }}
+                        </div>
+                        <div class="form-group">
+                            <label for="{{ form.commercial.id_for_label }}">👨‍💼 Commercial</label>
+                            {{ form.commercial.errors }}
+                            {{ form.commercial }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-container">
+                    <button type="submit" class="btn btn-primary">
+                        💾 Sauvegarder
+                    </button>
+                    <a href="{% url 'livraison_list' %}" class="btn btn-secondary">
+                        ⬅️ Retour à la liste
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

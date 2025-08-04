@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facture {{ invoice_number }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .invoice-wrapper {
+            max-width: 210mm;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .invoice-header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 40px;
+            position: relative;
+        }
+
+        .invoice-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            transform: translate(30px, -30px);
+        }
+
+        .header-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: start;
+        }
+
+        .company-section h1 {
+            font-size: 2.8rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            color: #ecf0f1;
+        }
+
+        .company-section .tagline {
+            font-size: 1.2rem;
+            color: #bdc3c7;
+            margin-bottom: 20px;
+            font-weight: 300;
+        }
+
+        .company-details {
+            font-size: 0.95rem;
+            color: #ecf0f1;
+            opacity: 0.9;
+        }
+
+        .company-details p {
+            margin: 5px 0;
+        }
+
+        .invoice-meta {
+            text-align: right;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 25px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .invoice-meta h2 {
+            font-size: 2.2rem;
+            margin-bottom: 20px;
+            color: #ecf0f1;
+        }
+
+        .invoice-meta .meta-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            font-size: 1rem;
+        }
+
+        .invoice-meta .meta-label {
+            font-weight: 600;
+            color: #bdc3c7;
+        }
+
+        .invoice-meta .meta-value {
+            color: #ecf0f1;
+            font-weight: 400;
+        }
+
+        .invoice-body {
+            padding: 0;
+        }
+
+        .client-section {
+            padding: 40px;
+            background: linear-gradient(135deg, #ecf0f1 0%, #f8f9fa 100%);
+            border-bottom: 3px solid #3498db;
+        }
+
+        .client-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .client-header h3 {
+            font-size: 1.4rem;
+            color: #2c3e50;
+            margin-left: 10px;
+        }
+
+        .client-details {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            border-left: 4px solid #3498db;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .client-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .client-info {
+            color: #7f8c8d;
+            font-size: 1rem;
+        }
+
+        .items-section {
+            padding: 40px;
+        }
+
+        .items-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .items-header h3 {
+            font-size: 1.4rem;
+            color: #2c3e50;
+            margin-left: 10px;
+        }
+
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .items-table thead {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+        }
+
+        .items-table th {
+            padding: 20px 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .items-table tbody tr {
+            border-bottom: 1px solid #ecf0f1;
+            transition: all 0.3s ease;
+        }
+
+        .items-table tbody tr:hover {
+            background: #f8f9fa;
+            transform: translateX(2px);
+        }
+
+        .items-table tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        .items-table td {
+            padding: 18px 15px;
+            font-size: 0.9rem;
+            color: #2c3e50;
+        }
+
+        .date-cell {
+            font-family: 'Courier New', monospace;
+            color: #7f8c8d;
+            font-size: 0.85rem;
+        }
+
+        .amount-cell {
+            font-weight: 600;
+            color: #27ae60;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            background: #e8f5e8;
+            color: #27ae60;
+            display: inline-block;
+        }
+
+        .summary-section {
+            padding: 40px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #ecf0f1 100%);
+            border-top: 3px solid #3498db;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 40px;
+            align-items: start;
+        }
+
+        .summary-notes {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            border-left: 4px solid #f39c12;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .summary-notes h4 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .summary-notes p {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            margin: 8px 0;
+        }
+
+        .summary-totals {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        .summary-row:last-child {
+            border-bottom: none;
+        }
+
+        .summary-row.total {
+            margin-top: 15px;
+            padding-top: 20px;
+            border-top: 2px solid #3498db;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        .summary-label {
+            color: #7f8c8d;
+            font-weight: 500;
+        }
+
+        .summary-value {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .invoice-footer {
+            padding: 30px 40px;
+            text-align: center;
+            background: #2c3e50;
+            color: #bdc3c7;
+            font-size: 0.9rem;
+        }
+
+        .invoice-footer p {
+            margin: 5px 0;
+        }
+
+        .invoice-footer .highlight {
+            color: #3498db;
+            font-weight: 600;
+        }
+
+        .action-buttons {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-print {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+        }
+
+        .btn-print:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
+        }
+
+        .btn-back {
+            background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(149, 165, 166, 0.3);
+        }
+
+        .btn-back:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(149, 165, 166, 0.4);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #7f8c8d;
+        }
+
+        .empty-state .icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .empty-state h4 {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .header-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .invoice-meta {
+                text-align: left;
+            }
+
+            .client-section,
+            .items-section,
+            .summary-section {
+                padding: 20px;
+            }
+
+            .summary-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .action-buttons {
+                position: relative;
+                top: auto;
+                right: auto;
+                justify-content: center;
+                margin-bottom: 20px;
+            }
+
+            .items-table {
+                font-size: 0.8rem;
+            }
+
+            .items-table th,
+            .items-table td {
+                padding: 10px 8px;
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+
+            .invoice-wrapper {
+                box-shadow: none;
+                border-radius: 0;
+                max-width: none;
+            }
+
+            .action-buttons {
+                display: none;
+            }
+
+            .items-table tbody tr:hover {
+                background: none;
+                transform: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="action-buttons">
+        <button class="btn btn-print" onclick="window.print()">
+            🖨️ Imprimer
+        </button>
+        <a href="{% url 'livraison_list' %}" class="btn btn-back">
+            ← Retour
+        </a>
+    </div>
+
+    <div class="invoice-wrapper">
+        <!-- Header -->
+        <div class="invoice-header">
+            <div class="header-content">
+                <div class="company-section">
+                    <h1>TRANSPORT PRO</h1>
+                    <p class="tagline">Solutions de Transport & Logistique</p>
+                    <div class="company-details">
+                        <p>📍 123 Avenue Mohammed V, Casablanca 20000</p>
+                        <p>📞 +212 5XX-XX-XX-XX</p>
+                        <p>✉️ contact@transportpro.ma</p>
+                        <p>🌐 www.transportpro.ma</p>
+                    </div>
+                </div>
+                
+                <div class="invoice-meta">
+                    <h2>FACTURE</h2>
+                    <div class="meta-item">
+                        <span class="meta-label">Numéro:</span>
+                        <span class="meta-value">{{ invoice_number }}</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Date:</span>
+                        <span class="meta-value">{{ invoice_date }}</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Échéance:</span>
+                        <span class="meta-value">{{ invoice_date }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Body -->
+        <div class="invoice-body">
+            <!-- Client Section -->
+            <div class="client-section">
+                <div class="client-header">
+                    <span style="font-size: 1.5rem;">🏢</span>
+                    <h3>INFORMATIONS CLIENT</h3>
+                </div>
+                <div class="client-details">
+                    <div class="client-name">{{ client|default:"Client Non Spécifié" }}</div>
+                    {% if livraisons.first.ice %}
+                        <div class="client-info">
+                            <strong>ICE:</strong> {{ livraisons.first.ice }}
+                        </div>
+                    {% endif %}
+                    <div class="client-info">
+                        <strong>Nombre de livraisons:</strong> {{ livraisons|length }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Items Section -->
+            <div class="items-section">
+                <div class="items-header">
+                    <span style="font-size: 1.5rem;">📦</span>
+                    <h3>DÉTAILS DES LIVRAISONS</h3>
+                </div>
+                
+                <table class="items-table">
+                    <thead>
+                        <tr>
+                            <th>Client</th>
+                            <th>Date Charge</th>
+                            <th>Lieu Charge</th>
+                            <th>Lieu Décharge</th>
+                            <th>Bon Livraison</th>
+                            <th>ICE</th>
+                            <th>Tarif</th>
+                            <th>Qté</th>
+                            <th>Statut</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for livraison in livraisons %}
+                            <tr>
+                                <td><strong>{{ livraison.client|default:"-" }}</strong></td>
+                                <td class="date-cell">{{ livraison.date_chargement|date:"d/m/Y"|default:"-" }}</td>
+                                <td>{{ livraison.chargements|default:"-" }}</td>
+                                <td>{{ livraison.dechargement|default:"-" }}</td>
+                                <td>{{ livraison.bon_livraison|default:"-" }}</td>
+                                <td>{{ livraison.ice|default:"-" }}</td>
+                                <td class="amount-cell">{{ livraison.tarif|default:"-" }}</td>
+                                <td><strong>{{ livraison.qte|default:"-" }}</strong></td>
+                                <td>
+                                    {% if livraison.facturation %}
+                                        <span class="status-badge">{{ livraison.facturation }}</span>
+                                    {% else %}
+                                        <span class="status-badge">En attente</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="9">
+                                    <div class="empty-state">
+                                        <span class="icon">📦</span>
+                                        <h4>Aucune livraison</h4>
+                                        <p>Aucune livraison sélectionnée pour cette facture</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Summary Section -->
+            <div class="summary-section">
+                <div class="summary-grid">
+                    <div class="summary-notes">
+                        <h4>📝 Notes & Conditions</h4>
+                        <p><strong>Conditions de paiement:</strong> Payable sous 30 jours</p>
+                        <p><strong>Mode de paiement:</strong> Virement bancaire ou chèque</p>
+                        <p><strong>Remarques:</strong> Facture générée automatiquement</p>
+                        <p><strong>Contact:</strong> Pour toute question, contactez notre service client</p>
+                    </div>
+                    
+                    <div class="summary-totals">
+                        <div class="summary-row">
+                            <span class="summary-label">Nombre de livraisons:</span>
+                            <span class="summary-value">{{ livraisons|length }}</span>
+                        </div>
+                        
+                        <div class="summary-row">
+                            <span class="summary-label">Quantité totale:</span>
+                            <span class="summary-value">{{ total_qte }}</span>
+                        </div>
+                        
+                        <div class="summary-row">
+                            <span class="summary-label">Sous-total HT:</span>
+                            <span class="summary-value">À calculer</span>
+                        </div>
+                        
+                        <div class="summary-row">
+                            <span class="summary-label">TVA (20%):</span>
+                            <span class="summary-value">À calculer</span>
+                        </div>
+                        
+                        <div class="summary-row total">
+                            <span>TOTAL TTC:</span>
+                            <span>À CALCULER</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="invoice-footer">
+            <p>Merci pour votre confiance en <span class="highlight">Transport Pro</span></p>
+            <p>Cette facture a été générée automatiquement le {{ invoice_date }}</p>
+            <p>RC: 123456 | Patente: 78901234 | IF: 56789012</p>
+        </div>
+    </div>
+
+    <script>
+        // Smooth loading animation
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelector('.invoice-wrapper').style.opacity = '0';
+            document.querySelector('.invoice-wrapper').style.transform = 'translateY(20px)';
+            
+            setTimeout(() => {
+                document.querySelector('.invoice-wrapper').style.transition = 'all 0.6s ease';
+                document.querySelector('.invoice-wrapper').style.opacity = '1';
+                document.querySelector('.invoice-wrapper').style.transform = 'translateY(0)';
+            }, 100);
+        });
+
+        // Enhanced print functionality
+        function printInvoice() {
+            window.print();
+        }
+    </script>
+</body>
+</html>
