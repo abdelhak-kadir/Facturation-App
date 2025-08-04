@@ -33,7 +33,7 @@ A Django-based delivery management system that imports data from Google Sheets a
 1. **Clone the repository**
 
    ```bash
-   git clone <your-repo-url>
+   git clone https://github.com/abdelhak-kadir/Facturation-App.git
    cd delivery-management-system
    ```
 
@@ -57,7 +57,7 @@ A Django-based delivery management system that imports data from Google Sheets a
    - Enable Google Sheets API and Google Drive API
    - Create service account credentials
    - Download the JSON credentials file
-   - Place it in `importer/credentials/sheetimporterproject-8a59547703c3.json`
+   - Place it in `importer/credentials/`
 
 5. **Configure Django**
 
@@ -116,10 +116,10 @@ Update the Google Sheet IDs in `sheet_importer.py`:
 
 ```python
 # Sheet 1
-sheet = client.open_by_key("1edSsFLbTpUsQCHUXVyXQoywJZ5x_XOZNLrYYixS1sDM").sheet1
+sheet = client.open_by_key("sheet ID").sheet1
 
 # Sheet 2
-sheet = client.open_by_key("1jl2rRck8m4TeSaV91JjJ89kbIxXfNIWshQf_lAwbRYw").sheet1
+sheet = client.open_by_key("sheet ID").sheet1
 ```
 
 ## 🎯 Usage
