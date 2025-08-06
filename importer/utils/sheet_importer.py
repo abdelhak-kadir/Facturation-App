@@ -11,10 +11,10 @@ def import_livraisons_from_sheet():
     ]
 
     creds = ServiceAccountCredentials.from_json_keyfile_name(
-        'importer/credentials/sheetimporterproject-8a59547703c3.json', scope)
+        'importer/credentials/sheetimporterproject-468211-d4bfa68f711f.json', scope)
     client = gspread.authorize(creds)
 
-    sheet = client.open_by_key("1edSsFLbTpUsQCHUXVyXQoywJZ5x_XOZNLrYYixS1sDM").sheet1
+    sheet = client.open_by_key("1aAVGSHrjGE82Py3MiL5MUtS_jo2JwKp-O7lR5-VrVGE").sheet1
     rows = sheet.get_all_records()
     for sheet in client.openall():
         print(sheet.title)
@@ -107,10 +107,10 @@ def import_livraisons_from_sheet2():
     ]
 
     creds = ServiceAccountCredentials.from_json_keyfile_name(
-        'importer/credentials/sheetimporterproject-8a59547703c3.json', scope)
+        'importer/credentials/sheetimporterproject-468211-d4bfa68f711f.json', scope)
     client = gspread.authorize(creds)
 
-    sheet = client.open_by_key("1jl2rRck8m4TeSaV91JjJ89kbIxXfNIWshQf_lAwbRYw").sheet1
+    sheet = client.open_by_key("1oxQxHFF3jwHbEVmsS0czzeAw5INwZxvsriQzYJllyIk").sheet1
     
     try:
         # Get all values as a list of lists

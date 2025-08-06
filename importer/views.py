@@ -25,7 +25,7 @@ from docx.enum.table import WD_TABLE_ALIGNMENT
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
-
+from decimal import InvalidOperation
 
 def trigger_import_ajax(request):
     """Handle import functionality with AJAX for livraison_list page"""
@@ -125,6 +125,7 @@ def generate_invoice(request):
         return render(request, 'invoice.html', context)
     
     return redirect('livraison_list')
+
 def generate_word_invoice(request):
     """
     Generate a professionally styled Word invoice document based on selected livraisons
@@ -324,29 +325,30 @@ def _populate_main_table_data(table, selected_livraisons):
                 shading_elm = parse_xml(r'<w:shd {} w:fill="F8F9FA"/>'.format(nsdecls('w')))
                 cell._tc.get_or_add_tcPr().append(shading_elm)
         
-        # Populate row data
+        # Populate basic row data (date, BC number, trajet, quantity)
         _populate_row_data(row_cells, livraison)
         
-        # Calculate amounts
-        qte = livraison.qte or 0
+        # Calculate amounts: Quantity × Unit Price = Amount HT
+        qte = livraison.qte or 1
         try:
+            # Clean and convert tarif (unit price) to Decimal
             tarif_str = str(livraison.tarif or '0').replace(',', '').replace(' ', '')
-            tarif = Decimal(tarif_str) if tarif_str.replace('.', '').isdigit() else Decimal('0')
-        except:
+            tarif = Decimal(tarif_str) if tarif_str.replace('.', '').replace('-', '').isdigit() else Decimal('0')
+        except (ValueError, InvalidOperation):
             tarif = Decimal('0')
         
-        montant = tarif * qte
-        total_ht += montant
+        # Calculate montant HT = quantity × unit price
+        montant_ht = Decimal(str(qte)) * tarif
+        total_ht += montant_ht
         
-        # Update amount cell
-        row_cells[4].text = f"{tarif:.2f}"
-        row_cells[5].text = f"{montant:.2f}"
+        # Update cells with calculated values
+        row_cells[4].text = f"{tarif:.2f}"  # PU HT (Unit Price)
+        row_cells[5].text = f"{montant_ht:.2f}"  # Montant HT (Amount HT)
         
         # Apply cell formatting
         _format_data_cells(row_cells)
     
     return total_ht
-
 
 def _populate_row_data(row_cells, livraison):
     """Populate individual row data"""
@@ -386,8 +388,8 @@ def _format_data_cells(row_cells):
 
 
 def _create_totals_table(doc, total_ht):
-    """Create a separate table for totals aligned with PU HT and Montant HT columns"""
-    # Create table with 2 columns (PU HT and Montant HT equivalent)
+    """Create a separate table for totals with 12% TVA"""
+    # Create table with 2 columns (Label and Amount)
     table = doc.add_table(rows=3, cols=2)
     table.style = 'Table Grid'
     table.autofit = True
@@ -396,15 +398,15 @@ def _create_totals_table(doc, total_ht):
     # Set table alignment to right
     table.alignment = WD_TABLE_ALIGNMENT.RIGHT
     
-    # Calculate amounts
-    tva_rate = Decimal('0.20')  # 20%
+    # Calculate amounts with 12% TVA
+    tva_rate = Decimal('0.12')  # 12% TVA rate
     tva_amount = total_ht * tva_rate
     total_ttc = total_ht + tva_amount
     
     # Define totals data
     totals_data = [
         ("Total HT", total_ht, "4472C4"),
-        ("TVA 20%", tva_amount, "4472C4"),
+        ("TVA 12%", tva_amount, "4472C4"),
         ("TOTAL TTC", total_ttc, "2E5BC7")
     ]
     
@@ -444,9 +446,9 @@ def _create_totals_table(doc, total_ht):
 
 
 def _add_amount_in_words(doc, total_ht):
-    """Add amount in words section"""
-    # Calculate total TTC for amount in words
-    tva_rate = Decimal('0.20')
+    """Add amount in words section using TTC amount with 12% TVA"""
+    # Calculate total TTC for amount in words (with 12% TVA)
+    tva_rate = Decimal('0.12')  # 12% TVA
     tva_amount = total_ht * tva_rate
     total_ttc = total_ht + tva_amount
     
@@ -533,4 +535,21 @@ def number_to_french_words(number):
         # Fallback if num2words is not installed
         return f"{number:.2f}"
 
+def _clean_numeric_value(value, default=Decimal('0')):
+    """Clean and convert a value to Decimal, handling various edge cases"""
+    if value is None:
+        return default
+    
+    try:
+        # Convert to string and clean
+        clean_str = str(value).replace(',', '').replace(' ', '').strip()
+        
+        # Handle empty strings
+        if not clean_str:
+            return default
+            
+        # Convert to Decimal
+        return Decimal(clean_str)
+    except (ValueError, InvalidOperation, TypeError):
+        return default
 
