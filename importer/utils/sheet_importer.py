@@ -40,7 +40,7 @@ def import_livraisons_from_sheet():
             nom_chauffeur=row.get("nom_chauffeur") or row.get("NOM DE CHAUFFEUR"),
             client=row.get("client") or row.get("CLIENTS"),
             chargements=row.get("chargements") or row.get("CHARGEMENTS"),
-            date_chargement=parse_date(row.get("date_chargement") or row.get("DATE DE CHAR")),
+            date_chargement=parse_date_flexible(row.get("date_chargement") or row.get("DATE DE CHAR")),
             dechargement=row.get("dechargement") or row.get("DECHARGEMENT"),
             bon_livraison=row.get("bon_livraison") or row.get("bon de livraison"),
             tarif=row.get("tarif") or row.get("Tarif"),
@@ -59,6 +59,38 @@ def import_livraisons_from_sheet():
     print("✅ Livraisons imported successfully!")
 
 
+def parse_date_flexible(date_str):
+    """Parse date with multiple format support - similar to timestamp parsing logic"""
+    if not date_str:
+        return None
+    
+    # Remove extra whitespace
+    date_str = date_str.strip()
+    if not date_str:
+        return None
+    
+    # Try multiple date formats - both American and European
+    formats_to_try = [
+        "%m/%d/%Y",      # 6/30/2025 (American format)
+        "%d/%m/%Y",      # 18/07/2025 (European format)
+        "%Y-%m-%d",      # 2025-07-18 (ISO format)
+        "%d-%m-%Y",      # 18-07-2025 (European with dashes)
+        "%m-%d-%Y",      # 07-18-2025 (American with dashes)
+        "%d.%m.%Y",      # 18.07.2025 (European with dots)
+        "%m.%d.%Y",      # 07.18.2025 (American with dots)
+        "%Y/%m/%d",      # 2025/07/18 (ISO with slashes)
+    ]
+    
+    for fmt in formats_to_try:
+        try:
+            parsed_date = datetime.strptime(date_str, fmt).date()
+            print(f"   📅 Date '{date_str}' parsed with format '{fmt}': {parsed_date}")
+            return parsed_date
+        except ValueError:
+            continue
+    
+    print(f"   ❌ Could not parse date: '{date_str}' with any format")
+    return None
 
 def parse_datetime(dt_str):
     if not dt_str:
@@ -221,7 +253,7 @@ def import_livraisons_from_sheet2():
                 'nom_chauffeur': row.get("nom_chauffeur") or row.get("NOM DE CHAUFFEUR") or "",
                 'client': row.get("clients") or row.get("CLIENTS") or "",
                 'chargements': row.get("LIEU DE CHARGE") or "",
-                'date_chargement': parse_date(row.get("date_chargement") or row.get("DATE DE CHARGE")),
+                'date_chargement': parse_date_flexible(row.get("DATE CHARGE")),
                 'dechargement': row.get("LIEU DE DECHARGE") or "",
                 'bon_livraison': row.get("bon_livraison") or row.get("BON DE LIVRAISON") or "",
                 'tarif': row.get("PRIX DE VOYAGE") or "",
